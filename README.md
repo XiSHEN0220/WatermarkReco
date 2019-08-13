@@ -5,10 +5,11 @@ Pytorch implementation of Paper "Large Scale Historical Watermarks Recognition: 
 [[PDF(TODO)]]() [[Project webpage]](http://imagine.enpc.fr/~shenx/Watermark/) 
 
 <p align="center">
-<img src="TODO" width="400px" alt="teaser">
+<img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/teaser.png" width="800px" alt="teaser">
 </p>
 
-If our project is helpful for your research, please consider citing : 
+The project is an extension work to [ArtMiner](http://imagine.enpc.fr/~shenx/ArtMiner/). If our project is helpful for your research, please consider citing : 
+
 ```
 @inproceedings{shen2019watermark,
           title={Large Scale Historical Watermarks Recognition: dataset and a new consistency-based approach},
@@ -24,6 +25,7 @@ If our project is helpful for your research, please consider citing :
 * [Local Matching](#local-matching)
 * [Feature Learning](#feature-learning)
 * [Visual Results](#visual-results)
+
 
 
 ## Installation
@@ -129,31 +131,41 @@ bash demo_SBIR_Finetune.sh # Eta = 4 for chairs Eta = 3 for shoes
 
 ## Visual Results 
 
-Top-5 retrieval results on Briquet + B Test dataset with using engraving as references:  
+Top-5 retrieval results on Briquet + B Test dataset with using engraving as references:
 
 <p align="center">
 <img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/engraving.png" width="800" alt="teaser">
 </p>
 
 
-Top-5 retrieval results on Briquet + B Test dataset with using synthetic image as references:  
+Top-5 retrieval results on Briquet + B Test dataset with using synthetic image as references:
 
 <p align="center">
 <img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/synthetic.png" width="800px" alt="teaser">
 </p>
 
-Top-5 retrieval results on Shoes Test dataset:  
+Top-5 retrieval results on Shoes Test dataset:
 
 <p align="center">
 <img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/shoes.png" width="800px" alt="teaser">
 </p>
 
 
-Top-5 retrieval results on Chairs Test dataset:  
+Top-5 retrieval results on Chairs Test dataset:
 
 <p align="center">
 <img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/chairs.png" width="800px" alt="teaser">
 </p>
+
+
+
+
+
+
+
+
+
+
 
 
 
