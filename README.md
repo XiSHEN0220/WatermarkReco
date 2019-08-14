@@ -51,7 +51,7 @@ Resume of the watermark dataset:
 | Dataset |   #cls X #img per cls | Description and Task| Our Top-1 Acc (%)|
 | :------: |  :------: | :------: |:------: |
 | A Train | 100 X 50 + 100 X 10| Train and test on the same 100 classes, classification|-|
-| A Test | 100 X 3| Another 100 classes different from A train, 1 ref + 2 test photographs, one-shot recognition|93|
+| A Test | 100 X 3| Another 100 classes different from A train, 1 ref + 2 test photographs, one-shot recognition|89|
 | B Train | 140 X 1-7| 140 classes, 1 engraving + 1-7 photographs, cross-domain feature fine-tuning|-|
 | B Test | 100 X 3| 100 classes different from B Train, 1 engraving + 2 photographs, one-shot cross-domain recognition|77|
 | Briquet | 16753 X 1| 16753 classes, 1 engraving, large scale one-shot cross-domain recognition|50|

@@ -122,58 +122,112 @@ def MatchPair(minNet, strideNet, model, transform, scales, feat1, feat1W, feat1H
     
     return np.hstack((match1, np.ones((match1.shape[0], 1)))), np.hstack((match2, np.ones((match2.shape[0], 1)))), similarity, gridSize
 
-    
-    
-def ScorePosALL(match1, match2, score, gridSize, tolerance) : 
-    
-    #All The Data
-    
-    error = np.sum((match2 - match1) ** 2, axis = 1)**0.5
-    inlier = {}
-    
-    for i in range(len(match1)) : 
-        score_i = score[i] * np.exp(-1 * error[i] ** 2 / tolerance ** 2)
-        key = (match1[i][0], match1[i][1])
-        if key in inlier and inlier[key][1] < score_i : 
-            inlier[key] = [match2[i], score_i.item(), gridSize[i]] 
-        elif not key in inlier : 
-            inlier[key] = [match2[i], score_i.item(), gridSize[i]]
-            
-    return sum([item[1] for item in inlier.values()]), inlier
-    
-def ScorePosSCS(match1, match2, score, gridSize, tolerance) : 
-    
-    #All The Data
-    
-    error = np.sum((match2 - match1) ** 2, axis = 1)**0.5
-    inlier = {}
-    
-    for i in range(len(match1)) : 
-        score_i = np.exp(-1 * error[i] ** 2 / tolerance ** 2)
-        key = (match1[i][0], match1[i][1])
-        if key in inlier and inlier[key][1] < score_i : 
-            inlier[key] = [match2[i], score_i.item(), gridSize[i]] 
-        elif not key in inlier : 
-            inlier[key] = [match2[i], score_i.item(), gridSize[i]]
-            
-    return sum([item[1] for item in inlier.values()]), inlier
+def Affine(X, Y):
+	nb_points = X.shape[0]
+	H21 = np.linalg.lstsq(Y, X[:, :2])[0]
+	H21 = H21.T
+	H21 = np.array([[H21[0, 0], H21[0, 1], H21[0, 2]], 
+					[H21[1, 0], H21[1, 1], H21[1, 2]],
+					[0, 0, 1]])
+	return H21
 
-def ScorePosFS(match1, match2, score, gridSize, tolerance) : 
+def Hough(X, Y) : 
+    nb_points = X.shape[0]
+    ones = np.ones((nb_points, 1))
+    H21x = np.linalg.lstsq(np.hstack((Y[:, 0].reshape((-1, 1)), ones)), X[:, 0])[0]
+    H21y = np.linalg.lstsq(np.hstack((Y[:, 1].reshape((-1, 1)), ones)), X[:, 1])[0]
+    
+    H21 = np.array([[H21x[0], 0, H21x[1]], 
+                    [0, H21y[0], H21y[1]],
+                    [0, 0, 1]])
+    return H21
+
+def Prediction(X, Y, H21) : 
+
+    estimX = (np.dot(H21, Y.T)).T
+    estimX = estimX / estimX[:, 2].reshape((-1, 1))
+    return np.sum((X[:, :2]- estimX[:, :2])**2, axis=1)**0.5
+    	    
+    
+def ScorePosIdentity(match1, match2, score, gridSize, tolerance) : 
     
     #All The Data
     
     error = np.sum((match2 - match1) ** 2, axis = 1)**0.5
-    inlier = {}
-    
-    for i in range(len(match1)) : 
-        score_i = score[i]
-        key = (match1[i][0], match1[i][1])
-        if key in inlier and inlier[key][1] < score_i : 
-            inlier[key] = [match2[i], score_i.item(), gridSize[i]] 
-        elif not key in inlier : 
-            inlier[key] = [match2[i], score_i.item(), gridSize[i]]
+    if len(match1) < 4 : 
+        return 0, {}
+    scoreTotal = score * np.exp(-1 * error ** 2 / tolerance ** 2)
+    keys = [(match1[i][0], match1[i][1]) for i in range(len(match1))]
+    bestInlier = {k : [0, 0, 0] for k in keys}
+    for j in range(len(keys)) : 
+        if scoreTotal[j] > bestInlier[keys[j]][1] : 
+            bestInlier[keys[j]] = [match2[j], scoreTotal[j], gridSize[j]]
             
-    return sum([item[1] for item in inlier.values()]), inlier
+    return sum([item[1] for item in bestInlier.values()]), bestInlier
+    
+def ScorePosHough(match1, match2, score, gridSize, tolerance, nbIter = 1000) : 
+    
+    #All The Data
+    bestScore, bestInlier, bestH = 0, {}, []
+    matchCombine = np.arange(len(match1))
+    if len(matchCombine) < 4 : 
+        return bestScore, bestInlier
+    keys = [(match1[i][0], match1[i][1]) for i in range(len(match1))]
+    
+    for i in range(nbIter) : 
+        index = np.random.choice(matchCombine, 2, replace=False)
+        H21 = Hough(match1[index], match2[index])
+        error = Prediction(match1, match2, H21)
+        scoreTotal = score * np.exp(-1 * error ** 2 / tolerance ** 2)
+        inlier = {k : 0 for k in keys}
+        for j in range(len(keys)) : 
+            inlier[keys[j]] = max(inlier[keys[j]], scoreTotal[j])
+        scoreTotal = sum(inlier.values())
+        if scoreTotal > bestScore : 
+            bestScore, bestH = scoreTotal, H21
+            
+    if len(bestH) > 0 : 
+        error = Prediction(match1, match2, bestH)
+        scoreTotal = score * np.exp(-1 * error ** 2 / tolerance ** 2)
+        bestInlier = {k : [0, 0, 0] for k in keys}
+        for j in range(len(keys)) : 
+            if scoreTotal[j] > bestInlier[keys[j]][1] : 
+                bestInlier[keys[j]] = [match2[j], scoreTotal[j], gridSize[j]]
+        
+            
+    return bestScore, bestInlier
+    
+def ScorePosAffine(match1, match2, score, gridSize, tolerance, nbIter = 1000) : 
+    
+    #All The Data
+    bestScore, bestInlier, bestH = 0, {}, []
+    matchCombine = np.arange(len(match1))
+    if len(matchCombine) < 4 : 
+        return bestScore, bestInlier
+    keys = [(match1[i][0], match1[i][1]) for i in range(len(match1))]
+    
+    for i in range(nbIter) : 
+        index = np.random.choice(matchCombine, 3, replace=False)
+        H21 = Affine(match1[index], match2[index])
+        error = Prediction(match1, match2, H21)
+        scoreTotal = score * np.exp(-1 * error ** 2 / tolerance ** 2)
+        inlier = {k : 0 for k in keys}
+        for j in range(len(keys)) : 
+            inlier[keys[j]] = max(inlier[keys[j]], scoreTotal[j])
+        scoreTotal = sum(inlier.values())
+        if scoreTotal > bestScore : 
+            bestScore, bestH = scoreTotal, H21
+            
+    if len(bestH) > 0 : 
+        error = Prediction(match1, match2, bestH)
+        scoreTotal = score * np.exp(-1 * error ** 2 / tolerance ** 2)
+        bestInlier = {k : [0, 0, 0] for k in keys}
+        for j in range(len(keys)) : 
+            if scoreTotal[j] > bestInlier[keys[j]][1] : 
+                bestInlier[keys[j]] = [match2[j], scoreTotal[j], gridSize[j]]
+        
+            
+    return bestScore, bestInlier
     
 
     

@@ -55,7 +55,7 @@ parser.add_argument(
     '--outDir', type=str, help='output json file to store the results')
     
 parser.add_argument(
-    '--flip', action='store_true', help='Horizontal and Vertical Flip????')
+    '--flip', action='store_true', help='Horizontal Flip????')
 
 parser.add_argument(
     '--saveRefFeat', action='store_true', help='For small number ref images, save features can largely reduce running time')
@@ -68,7 +68,7 @@ parser.add_argument(
     '--eta', type = float, default=1e-7, help='eta to compute norm')
 
 parser.add_argument(
-    '--scoreType', type = str, default='ALL', choices = ['ALL', 'SCS', 'FS'], help='type of score')
+    '--scoreType', type = str, default='Identity', choices = ['Identity', 'Hough', 'Affine'], help='type of score')
 
 parser.add_argument(
     '--dataset', type = str, default='watermark', choices = ['watermark', 'sketch'], help='running on which dataset')

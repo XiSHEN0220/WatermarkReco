@@ -64,7 +64,7 @@ parser.add_argument(
     '--eta', type = float, default=1e-7, help='eta to compute norm')
 
 parser.add_argument(
-    '--scoreType', type = str, default='ALL', choices = ['ALL', 'SCS', 'FS'], help='type of score')
+    '--scoreType', type = str, default='Identity', choices = ['Identity', 'Hough', 'Affine'], help='type of score')
 
 
 

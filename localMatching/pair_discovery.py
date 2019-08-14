@@ -24,12 +24,12 @@ if not sys.warnoptions:
 
 def PairDiscovery(img1Name, img1Dir, img2Name, img2Dir, model, transform, tolerance, margin, scaleImgRef, scaleList, eta=1e-7, featLayer = 'conv4', scoreType = 'ALL', RefFeat = {}, flip = False) : 
 	
-	if scoreType == 'ALL' : 
-		ScorePos = outils.ScorePosALL 
-	elif scoreType == 'SCS' : 
-		ScorePos = outils.ScorePosSCS 
-	else : 
-		ScorePos = outils.ScorePosFS 
+	if scoreType == 'Identity' : 
+		ScorePos = outils.ScorePosIdentity 
+	elif scoreType == 'Hough' : 
+		ScorePos = outils.ScorePosHough 
+	elif scoreType == 'Affine' : 
+		ScorePos = outils.ScorePosAffine 
 		
 	
 	strideNet = 16
