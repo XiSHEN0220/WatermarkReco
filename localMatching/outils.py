@@ -170,7 +170,7 @@ def ScorePosHough(match1, match2, score, gridSize, tolerance, nbIter = 1000) :
     #All The Data
     bestScore, bestInlier, bestH = 0, {}, []
     matchCombine = np.arange(len(match1))
-    if len(matchCombine) < 4 : 
+    if len(matchCombine) < 10 : 
         return bestScore, bestInlier
     keys = [(match1[i][0], match1[i][1]) for i in range(len(match1))]
     
@@ -202,7 +202,7 @@ def ScorePosAffine(match1, match2, score, gridSize, tolerance, nbIter = 1000) :
     #All The Data
     bestScore, bestInlier, bestH = 0, {}, []
     matchCombine = np.arange(len(match1))
-    if len(matchCombine) < 4 : 
+    if len(matchCombine) < 10 : 
         return bestScore, bestInlier
     keys = [(match1[i][0], match1[i][1]) for i in range(len(match1))]
     
