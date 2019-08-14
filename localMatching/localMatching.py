@@ -235,7 +235,7 @@ if args.outDir :
         resSave = {}
         for sourceImgName in res :
             if sourceImgName != 'accuracy': 
-                resSave[sourceImgName] = [[res[sourceImgName][i][1], res[sourceImgName][i][0], False, 0] for i in range(len(res[sourceImgName]))]
+                resSave[sourceImgName] = [[res[sourceImgName][i][1], res[sourceImgName][i][0], res[sourceImgName][i][2], 0] for i in range(len(res[sourceImgName]))]
             
         with open(os.path.join(args.outDir, 'res.json'), 'w') as f : 
             json.dump(resSave, f)        
