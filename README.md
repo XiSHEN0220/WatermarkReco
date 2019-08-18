@@ -5,7 +5,7 @@ Pytorch implementation of Paper "Large Scale Historical Watermarks Recognition: 
 [[PDF(TODO)]]() [[Project webpage]](http://imagine.enpc.fr/~shenx/Watermark/) 
 
 <p align="center">
-<img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/teaser.png" width="800px" alt="teaser">
+<img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/teaser.jpg" width="800px" alt="teaser">
 </p>
 
 The project is an extension work to [ArtMiner](http://imagine.enpc.fr/~shenx/ArtMiner/). If our project is helpful for your research, please consider citing : 
