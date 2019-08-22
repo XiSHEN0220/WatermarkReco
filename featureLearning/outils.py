@@ -7,14 +7,7 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 from tqdm import tqdm
 
-## Each image in the searching dataset will be resized
-## The function below defines maximum dimensions in the feature map for different scales
 
-def ScaleList(featScaleBase, nbOctave, scalePerOctave) :
-
-    scaleList = np.array([featScaleBase * (2 ** nbOctave -  2**(float(scale_id)/scalePerOctave)) for scale_id in range(0, 1 + nbOctave * scalePerOctave)]).astype(int) + featScaleBase
-
-    return scaleList
 
 ## Given a featMax (maximum dimensions in the feature map)
 ## The function calculate the output size to resize the image with keeping the aspect reatio

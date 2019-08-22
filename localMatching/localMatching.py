@@ -20,13 +20,13 @@ parser = argparse.ArgumentParser()
 
 ##---- Search Dataset Setting ----####
 parser.add_argument(
-    '--featScaleBase', type=int, default= 11, help='minimum # of features in the scale list ')
+    '--featScaleBase', type=int, default= 22, help='median # of features in the scale list ')
 
 parser.add_argument(
-    '--scalePerOctave', type=int, default= 3, help='# of scales in one octave ')
+    '--stepNbFeat', type=int, default= 3, help='difference nb feature in adjacent scales ')
 
 parser.add_argument(
-    '--nbOctave', type=int, default= 2, help='# of octaves')
+    '--nbscale', type=int, default= 2, help='# of octaves')
 
 ##---- Model Setting ----####
 
@@ -39,8 +39,6 @@ parser.add_argument(
 parser.add_argument(
     '--tolerance', type=float , default = 2., help='tolerance expressed by nb of features (2 for retrieval with image 1 for retrieval with region)')
 
-parser.add_argument(
-    '--scaleImgRef', type=int , default = 22, help='maximum feature in the target image')
 
 parser.add_argument(
     '--labelJson', type=str, default = '../data/labelBOneshotVal.json', help='labels of cross domain matching')
@@ -52,7 +50,7 @@ parser.add_argument(
     '--queryDir', type=str, default = '../data/watermark/B_cross_domain/valBG2/', help='query image dataset')
 
 parser.add_argument(
-    '--outDir', type=str, help='output json file to store the results')
+    '--outJson', type=str, help='output json file to store the results')
     
 parser.add_argument(
     '--flip', action='store_true', help='Horizontal Flip????')
@@ -132,8 +130,8 @@ net.cuda()
 strideNet = 16
 minNet = 15
 	
-scaleList = outils.ScaleList(args.featScaleBase, args.nbOctave, args.scalePerOctave)
-
+scaleList = [args.featScaleBase - args.stepNbFeat * i for i in range(args.nbscale, 0, -1)] + [args.featScaleBase] + [args.featScaleBase + args.stepNbFeat * i for i in range(1, args.nbscale + 1)]
+print (scaleList)
 
 with open(args.labelJson, 'r') as f :
     label = json.load(f)
@@ -169,7 +167,7 @@ for sourceImgName in tqdm(label['val']) :
         maxScore, bestInlier, flip = 0, {}, False ## to find best image among flipped image
         
         
-        score, inlier = pair_discovery.PairDiscovery(sourceImgName, args.queryDir, targetImgName, args.searchDir, net, transform, args.tolerance, args.margin, args.scaleImgRef, scaleList, args.eta, args.featLayer, args.scoreType, RefFeat, False)
+        score, inlier = pair_discovery.PairDiscovery(sourceImgName, args.queryDir, targetImgName, args.searchDir, net, transform, args.tolerance, args.margin, args.featScaleBase, scaleList, args.eta, args.featLayer, args.scoreType, RefFeat, False)
         
         if score > maxScore : 
             maxScore, bestInlier, flipBest = score, inlier, False
@@ -177,7 +175,7 @@ for sourceImgName in tqdm(label['val']) :
         
         
         if args.flip : 
-            scoreflipH, inlier = pair_discovery.PairDiscovery(sourceImgName, args.queryDir, targetImgName, args.searchDir, net, transform, args.tolerance, args.margin, args.scaleImgRef, scaleList, args.eta, args.featLayer, args.scoreType, RefFeatFlip, True)
+            scoreflipH, inlier = pair_discovery.PairDiscovery(sourceImgName, args.queryDir, targetImgName, args.searchDir, net, transform, args.tolerance, args.margin, args.featScaleBase, scaleList, args.eta, args.featLayer, args.scoreType, RefFeatFlip, True)
         else : 
             scoreflipH, inlier = 0, 0
         
@@ -186,7 +184,7 @@ for sourceImgName in tqdm(label['val']) :
         
         
         
-        res[sourceImgName].append((targetImgName, maxScore, bestInlier, flipBest))
+        res[sourceImgName].append((targetImgName, maxScore, flipBest, 0))
     
     
     
@@ -206,41 +204,13 @@ for sourceImgName in list(res.keys()) :
     if label['annotation'][sourceImgName] in predTop10 : 
         truePosTop10Count += 1
         
-res['accuracy'] = truePosCount / float(nbSourceImg)
-msg = '***** Final accuracy is {:.3f}, Top 10 {:.3f}*****'.format(res['accuracy'], truePosTop10Count / nbSourceImg)
+msg = '***** Final accuracy is {:.3f}, Top 10 {:.3f}*****'.format(truePosCount / float(nbSourceImg), truePosTop10Count / nbSourceImg)
 print (msg)
 
+if args.outJson : 
+    with open(args.outJson, 'w') as f :
+        json.dump(res, f)
 
-sourceImgNameList = sorted(list(res.keys()))
-if args.outDir : 
-    os.mkdir(args.outDir)
-    
-    
-    for j, sourceImgName in enumerate(sourceImgNameList) :
-        if sourceImgName == 'accuracy' :
-            continue  
-        tmpOutDir = os.path.join(args.outDir, str(j)) 
-        os.mkdir(tmpOutDir)
-        src = os.path.join(args.queryDir, sourceImgName)
-        dst = os.path.join(tmpOutDir, 'query.jpg')
-        copyfile(src, dst)
-        top5 = []
-        for i in range(len(res[sourceImgName])) :
-            if len(top5) < 5 and label['annotation'][res[sourceImgName][i][0]] not in top5 : 
-                top5.append(label['annotation'][res[sourceImgName][i][0]])
-                out = 'Rank{:d}_{:d}.jpg'.format(i, 1) if label['annotation'][sourceImgName] == label['annotation'][res[sourceImgName][i][0]] else 'Rank{:d}_{:d}.jpg'.format(i, 0)
-                out = os.path.join( tmpOutDir, out)
-                out2 = os.path.join( tmpOutDir, 'Org{:d}.jpg'.format(i) )
-                outils.drawPair(os.path.join(args.searchDir, res[sourceImgName][i][0]), out, out2, res[sourceImgName][i][3], res[sourceImgName][i][2])
-        resSave = {}
-        for sourceImgName in res :
-            if sourceImgName != 'accuracy': 
-                resSave[sourceImgName] = [[res[sourceImgName][i][1], res[sourceImgName][i][0], res[sourceImgName][i][3], 0] for i in range(len(res[sourceImgName]))]
-            
-        with open(os.path.join(args.outDir, 'res.json'), 'w') as f : 
-            json.dump(resSave, f)        
-         
-    
 
 
 

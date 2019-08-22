@@ -231,14 +231,6 @@ def ScorePosAffine(match1, match2, score, gridSize, tolerance, nbIter = 1000) :
     
 
     
-    
-
-def ScaleList(featScaleBase, nbOctave, scalePerOctave) :
-
-    scaleList = np.array([featScaleBase * (2 ** nbOctave -  2**(float(scaleId) / scalePerOctave)) for scaleId in range(0, 1 + nbOctave * scalePerOctave)]).astype(int) + featScaleBase
-
-    return scaleList
-    
 
 
 ## Blur the mask

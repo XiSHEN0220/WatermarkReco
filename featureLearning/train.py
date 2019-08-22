@@ -65,16 +65,15 @@ parser.add_argument(
     '--nbSearchImgEpoch', type=int, default = 2000, help='maximum number of searching image in one epoch')
 
 parser.add_argument(
-    '--featScaleBase', type=int, default = 11, help='number of features in the max dimension of the minimum scale')
+    '--featScaleBase', type=int, default= 22, help='median # of features in the scale list ')
 
 parser.add_argument(
-    '--nbOctave', type=int, default = 2, help='number of octave')
+    '--stepNbFeat', type=int, default= 3, help='difference nb feature in adjacent scales ')
 
 parser.add_argument(
-    '--scalePerOctave', type=int, default = 3, help='number of scales / octave')
+    '--nbscale', type=int, default= 2, help='# of octaves')
 
-parser.add_argument(
-    '--queryScale', type=int, default = 22, help='query image scale')
+
 
     
 parser.add_argument(
@@ -128,7 +127,7 @@ labelCategory = label['annotation']
 
 nbPatchTotal = args.nbSearchImgEpoch
 imgFeatMin = args.searchRegion + 2 * args.margin + 1 ## Minimum dimension of feature map in a image
-tolerance = args.tolerance / float(args.queryScale)
+tolerance = args.tolerance / float(args.featScaleBase)
 
 ## Loading model
 
@@ -195,7 +194,7 @@ transform = transforms.Compose([
                                 ])
                                 
 ## Scales
-scales = outils.ScaleList(args.featScaleBase, args.nbOctave, args.scalePerOctave)
+scales = [args.featScaleBase - args.stepNbFeat * i for i in range(args.nbscale, 0, -1)] + [args.featScaleBase] + [args.featScaleBase + args.stepNbFeat * i for i in range(1, args.nbscale + 1)]
 msg = 'We search to match in {:d} scales, the max dimensions in the feature maps are:'.format(len(scales))
 print (msg)
 print (scales)
@@ -241,7 +240,7 @@ for i_ in range(args.nbEpoch) :
         index = np.random.permutation(np.arange(len(SearchImgList)))[:args.nbSearchImgEpoch]
         searchImgList = [SearchImgList[i] for i in index]
 
-    featQuery, queryNameList = outils.RandomQueryFeat(nbPatchTotal, featChannel, args.searchRegion, imgFeatMin, minNet, strideNet, transform, net, args.searchDir, args.margin, queryImgList, args.cuda, args.queryScale)
+    featQuery, queryNameList = outils.RandomQueryFeat(nbPatchTotal, featChannel, args.searchRegion, imgFeatMin, minNet, strideNet, transform, net, args.searchDir, args.margin, queryImgList, args.cuda, args.featScaleBase)
 
     print ('---> Get topK patches matching to query...')
     topkImg, topkScale, topkValue, topkW, topkH = outils.RetrievalRes(nbPatchTotal, searchImgList, args.searchDir, args.margin, args.searchRegion, scales, minNet, strideNet, transform, net, featQuery, args.cuda, min(len(searchImgList), args.K))
@@ -289,7 +288,7 @@ for i_ in range(args.nbEpoch) :
 
     ## VALIDATION 
     net.eval()
-    featQuery, QueryImgList = outils.RandomQueryFeat(nbPatchTotal, featChannel, args.searchRegion, imgFeatMin, minNet, strideNet, transform, net, args.searchDir, args.margin, valQueryImgList, args.cuda, args.queryScale, False)
+    featQuery, QueryImgList = outils.RandomQueryFeat(nbPatchTotal, featChannel, args.searchRegion, imgFeatMin, minNet, strideNet, transform, net, args.searchDir, args.margin, valQueryImgList, args.cuda, args.featScaleBase, False)
 
     print ('---> Get top10 patches matching to query...')
     topkImg, topkScale, topkValue, topkW, topkH = outils.RetrievalRes(nbPatchTotal, valSearchImgList, args.searchDir, args.margin, args.searchRegion, scales, minNet, strideNet, transform, net, featQuery, args.cuda, min(len(valSearchImgList), args.valK))
