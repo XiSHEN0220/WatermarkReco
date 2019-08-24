@@ -150,8 +150,8 @@ truePosTop1000Count = 0
 for i in range(len(res)) : 
     sourceImg = label['val'][i]
     category = label['annotation'][sourceImg]
-    top50 = [label['annotation'][res[i][j][1]] for j in range(1000)]
-    truePosTop1000Count = truePosTop1000Count + 1 if category in top50[:1000] else truePosTop1000Count
+    top50 = [label['annotation'][res[i][j][1]] for j in range(min(1000, args.evaluateTopK))]
+    truePosTop1000Count = truePosTop1000Count + 1 if category in top50[:min(1000, args.evaluateTopK)] else truePosTop1000Count
     truePosTop100Count = truePosTop100Count + 1 if category in top50[:100] else truePosTop100Count
     truePosTop50Count = truePosTop50Count + 1 if category in top50[:50] else truePosTop50Count
     truePosTop40Count = truePosTop40Count + 1 if category in top50[:40] else truePosTop40Count
