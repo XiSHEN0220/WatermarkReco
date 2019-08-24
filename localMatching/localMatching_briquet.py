@@ -20,13 +20,14 @@ parser = argparse.ArgumentParser()
 
 ##---- Search Dataset Setting ----####
 parser.add_argument(
-    '--featScaleBase', type=int, default= 11, help='minimum # of features in the scale list ')
+    '--featScaleBase', type=int, default= 22, help='median # of features in the scale list ')
 
 parser.add_argument(
-    '--scalePerOctave', type=int, default= 3, help='# of scales in one octave ')
+    '--stepNbFeat', type=int, default= 3, help='difference nb feature in adjacent scales ')
 
 parser.add_argument(
-    '--nbOctave', type=int, default= 2, help='# of octaves')
+    '--nbscale', type=int, default= 2, help='# of octaves')
+
 
 ##---- Model Setting ----####
 
@@ -40,19 +41,16 @@ parser.add_argument(
     '--tolerance', type=float , default = 2., help='tolerance expressed by nb of features (2 for retrieval with image 1 for retrieval with region)')
 
 parser.add_argument(
-    '--scaleImgRef', type=int , default = 22, help='maximum feature in the target image')
-
-parser.add_argument(
     '--labelJson', type=str, default = '../data/BTestBriquet.json', help='labels json file')
     
 parser.add_argument(
-    '--preOrderJson', type=str, default = '../data/localSimiEngravingList.json', help='labels json file')
+    '--preOrderJson', type=str, default = '../data/LocalSimiFinetune.json', help='labels json file')
 
 parser.add_argument(
     '--evaluateTopK', type=int, default = 100, help='Evaluating Top K references in the preOrder Json file ')
 
 parser.add_argument(
-    '--searchDir', type=str, default = '../data/watermark/briquet_engraving/', help='searching image dataset')
+    '--searchDir', type=str, default = '../data/watermark/briquet_synthetic/', help='searching image dataset')
 
 parser.add_argument(
     '--queryDir', type=str, default = '../data/watermark/B_cross_domain_plus/val/', help='query image dataset')
@@ -90,9 +88,9 @@ net.eval()
 net.cuda()
 strideNet = 16
 minNet = 15
-	
-scaleList = outils.ScaleList(args.featScaleBase, args.nbOctave, args.scalePerOctave)
-
+    
+scaleList = [args.featScaleBase - args.stepNbFeat * i for i in range(args.nbscale, 0, -1)] + [args.featScaleBase] + [args.featScaleBase + args.stepNbFeat * i for i in range(1, args.nbscale + 1)]
+print (scaleList)
 
 with open(args.labelJson, 'r') as f :
     label = json.load(f)
@@ -110,30 +108,30 @@ transform = transforms.Compose([
 res = []
 res = [[] for i in range(len(label['val']))]
 with torch.no_grad() : 
-	for i, sourceImgName in tqdm(enumerate(label['val'])) :
-		sourceImgPath = os.path.join(args.queryDir, sourceImgName)
-		
-		for j in tqdm(range(args.evaluateTopK)) :
-		    _, targetImgName, flip, rotation = preOrder[i][j]
-		    
-		    RefFeat = {targetImgName:[]}
-		    targetImgPath = os.path.join(args.searchDir, targetImgName)
-		    I = Image.open(targetImgPath).convert('RGB')
-		    	
-		    I = I.transpose(Image.FLIP_LEFT_RIGHT) if flip else I
-		    I = I.rotate(rotation)
-		    for scale in scaleList :
-		        RefFeat[targetImgName].append(outils.imgFeat(minNet, strideNet, I, net, transform, scale, args.eta))
-		     
-		    score, inlier = pair_discovery.PairDiscovery(sourceImgName, args.queryDir, targetImgName, args.searchDir, net, transform, args.tolerance, args.margin, args.scaleImgRef, scaleList, args.eta, 'conv4', args.scoreType, RefFeat, False)
-		    res[i].append((score, targetImgName, flip, rotation))
+    for i, sourceImgName in tqdm(enumerate(label['val'])) :
+        sourceImgPath = os.path.join(args.queryDir, sourceImgName)
+        
+        for j in tqdm(range(args.evaluateTopK)) :
+            _, targetImgName, flip, rotation = preOrder[i][j]
+            
+            RefFeat = {targetImgName:[]}
+            targetImgPath = os.path.join(args.searchDir, targetImgName)
+            I = Image.open(targetImgPath).convert('RGB')
+                
+            I = I.transpose(Image.FLIP_LEFT_RIGHT) if flip else I
+            I = I.rotate(rotation)
+            for scale in scaleList :
+                RefFeat[targetImgName].append(outils.imgFeat(minNet, strideNet, I, net, transform, scale, args.eta))
+             
+            score, inlier = pair_discovery.PairDiscovery(sourceImgName, args.queryDir, targetImgName, args.searchDir, net, transform, args.tolerance, args.margin, args.featScaleBase, scaleList, args.eta, 'conv4', args.scoreType, RefFeat, False)
+            res[i].append((score, targetImgName, flip, rotation))
         
         
 res = [sorted(res[i], key=lambda s: s[0], reverse=True) for i in range(len(res))]
 
 with open(args.outJson, 'w') as f : 
     json.dump(res, f)
-    
+
 nbSourceImg = len(res)
 truePosCount = 0
 truePosTop2Count = 0
@@ -144,13 +142,16 @@ truePosTop20Count = 0
 truePosTop40Count = 0
 truePosTop50Count = 0
 truePosTop100Count = 0
+truePosTop1000Count = 0
+
 
 
 
 for i in range(len(res)) : 
     sourceImg = label['val'][i]
     category = label['annotation'][sourceImg]
-    top50 = [label['annotation'][res[i][j][1]] for j in range(100)]
+    top50 = [label['annotation'][res[i][j][1]] for j in range(1000)]
+    truePosTop1000Count = truePosTop1000Count + 1 if category in top50[:1000] else truePosTop1000Count
     truePosTop100Count = truePosTop100Count + 1 if category in top50[:100] else truePosTop100Count
     truePosTop50Count = truePosTop50Count + 1 if category in top50[:50] else truePosTop50Count
     truePosTop40Count = truePosTop40Count + 1 if category in top50[:40] else truePosTop40Count
@@ -165,16 +166,17 @@ for i in range(len(res)) :
 msg = "***** Time {:.3f}s, Top1 is {:.3f}, Top2 is {:.3f}, \
        Top3 is {:.3f}, Top5 is {:.3f}, \
        Top10 is {:.3f}, Top 20 is {:.3f}, \
-       Top 40 is {:.3}, Top50 is {:.3f}, Top100 is {:.3f}*****".format(  time.time() - start,
-                                                                         truePosCount / nbSourceImg,
-                                                                         truePosTop2Count / nbSourceImg,
-                                                                         truePosTop3Count / nbSourceImg,
-                                                                         truePosTop5Count / nbSourceImg,
-                                                                         truePosTop10Count / nbSourceImg,
-                                                                         truePosTop20Count / nbSourceImg,
-                                                                         truePosTop40Count / nbSourceImg,
-                                                                         truePosTop50Count / nbSourceImg,
-                                                                         truePosTop100Count / nbSourceImg)
+       Top 40 is {:.3}, Top50 is {:.3f}, Top100 is {:.3f}, Top1000 is {:.3f}*****".format(  time.time() - start,
+                                                                                             truePosCount / nbSourceImg,
+                                                                                             truePosTop2Count / nbSourceImg,
+                                                                                             truePosTop3Count / nbSourceImg,
+                                                                                             truePosTop5Count / nbSourceImg,
+                                                                                             truePosTop10Count / nbSourceImg,
+                                                                                             truePosTop20Count / nbSourceImg,
+                                                                                             truePosTop40Count / nbSourceImg,
+                                                                                             truePosTop50Count / nbSourceImg,
+                                                                                             truePosTop100Count / nbSourceImg,
+                                                                                             truePosTop1000Count / nbSourceImg)
                                                      
                                                      
                                                      
@@ -182,5 +184,68 @@ print (msg)
                                                      
                                                       
 
+
+
+
+
+
+
+
+
+
+
+
+
+nbSourceImg = len(preOrder)
+truePosCount = 0
+truePosTop2Count = 0
+truePosTop3Count = 0
+truePosTop5Count = 0
+truePosTop10Count = 0
+truePosTop20Count = 0
+truePosTop40Count = 0
+truePosTop50Count = 0
+truePosTop100Count = 0
+truePosTop1000Count = 0
+
+
+
+
+for i in range(len(res)) : 
+    sourceImg = label['val'][i]
+    category = label['annotation'][sourceImg]
+    top50 = [label['annotation'][preOrder[i][j][1]] for j in range(1000)]
+    truePosTop1000Count = truePosTop1000Count + 1 if category in top50[:1000] else truePosTop1000Count
+    truePosTop100Count = truePosTop100Count + 1 if category in top50[:100] else truePosTop100Count
+    truePosTop50Count = truePosTop50Count + 1 if category in top50[:50] else truePosTop50Count
+    truePosTop40Count = truePosTop40Count + 1 if category in top50[:40] else truePosTop40Count
+    truePosTop20Count = truePosTop20Count + 1 if category in top50[:20] else truePosTop20Count
+    truePosTop10Count = truePosTop10Count + 1 if category in top50[:10] else truePosTop10Count
+    truePosTop5Count = truePosTop5Count + 1 if category in top50[:5] else truePosTop5Count
+    truePosTop3Count = truePosTop3Count + 1 if category in top50[:3] else truePosTop3Count
+    truePosTop2Count = truePosTop2Count + 1 if category in top50[:2] else truePosTop2Count
+    truePosCount = truePosCount + 1 if category == top50[0] else truePosCount
+    
+
+msg = "***** Time {:.3f}s, Top1 is {:.3f}, Top2 is {:.3f}, \
+       Top3 is {:.3f}, Top5 is {:.3f}, \
+       Top10 is {:.3f}, Top 20 is {:.3f}, \
+       Top 40 is {:.3}, Top50 is {:.3f}, Top100 is {:.3f}, Top1000 is {:.3f}*****".format(  time.time() - start,
+                                                                                             truePosCount / nbSourceImg,
+                                                                                             truePosTop2Count / nbSourceImg,
+                                                                                             truePosTop3Count / nbSourceImg,
+                                                                                             truePosTop5Count / nbSourceImg,
+                                                                                             truePosTop10Count / nbSourceImg,
+                                                                                             truePosTop20Count / nbSourceImg,
+                                                                                             truePosTop40Count / nbSourceImg,
+                                                                                             truePosTop50Count / nbSourceImg,
+                                                                                             truePosTop100Count / nbSourceImg,
+                                                                                             truePosTop1000Count / nbSourceImg)
+                                                     
+                                                     
+                                                     
+print (msg)
+                                                     
+                                                      
 
 
