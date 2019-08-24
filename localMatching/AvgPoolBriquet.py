@@ -28,7 +28,7 @@ parser.add_argument(
     '--labelJson', type=str, default = '../data/BTestBriquet.json', help='labels json file')
 
 parser.add_argument(
-    '--searchDir', type=str, default = '../data/watermark/briquet_engraving/', help='searching image dataset')
+    '--searchDir', type=str, default = '../data/watermark/briquet_synthetic/', help='searching image dataset')
 
 parser.add_argument(
     '--queryDir', type=str, default = '../data/watermark/B_cross_domain_plus/val/', help='query image dataset')
