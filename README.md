@@ -134,28 +134,22 @@ bash demo_SBIR_Finetune.sh # Eta = 4 for chairs Eta = 3 for shoes
 Top-5 retrieval results on Briquet + B Test dataset with using engraving as references:
 
 <p align="center">
-<img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/engraving.png" width="800" alt="teaser">
+<img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/engraving.jpg" width="800" alt="teaser">
 </p>
 
 
 Top-5 retrieval results on Briquet + B Test dataset with using synthetic image as references:
 
 <p align="center">
-<img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/synthetic.png" width="800px" alt="teaser">
+<img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/synthetic.jpg" width="800px" alt="teaser">
 </p>
 
-Top-5 retrieval results on Shoes Test dataset:
+Top-5 retrieval results on Shoes / Chairs Test dataset:
 
 <p align="center">
-<img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/shoes.png" width="800px" alt="teaser">
+<img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/chairs.jpg" width="800px" alt="teaser">
 </p>
 
-
-Top-5 retrieval results on Chairs Test dataset:
-
-<p align="center">
-<img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/chairs.png" width="800px" alt="teaser">
-</p>
 
 
 
