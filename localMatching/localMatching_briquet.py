@@ -64,6 +64,11 @@ parser.add_argument(
 parser.add_argument(
     '--scoreType', type = str, default='Identity', choices = ['Identity', 'Hough', 'Affine'], help='type of score')
 
+parser.add_argument(
+    '--indexBegin', type = int, default=0, help='begin index')
+
+parser.add_argument(
+    '--indexEnd', type = int, default=200, help='end index')
 
 
 
@@ -98,6 +103,7 @@ with open(args.labelJson, 'r') as f :
 with open(args.preOrderJson, 'r') as f :
     preOrder = json.load(f)
 
+index = [i for i in range(args.indexBegin, args.indexEnd)]
 
 transform = transforms.Compose([
                                 transforms.ToTensor(),
@@ -106,13 +112,14 @@ transform = transforms.Compose([
                                 
 
 res = []
-res = [[] for i in range(len(label['val']))]
+res = [[] for i in index]
 with torch.no_grad() : 
-    for i, sourceImgName in tqdm(enumerate(label['val'])) :
+    for i in tqdm(range(len(index))) :
+        sourceImgName = label['val'][index[i]]
         sourceImgPath = os.path.join(args.queryDir, sourceImgName)
         
         for j in tqdm(range(args.evaluateTopK)) :
-            _, targetImgName, flip, rotation = preOrder[i][j]
+            _, targetImgName, flip, rotation = preOrder[index[i]][j]
             
             RefFeat = {targetImgName:[]}
             targetImgPath = os.path.join(args.searchDir, targetImgName)
@@ -148,7 +155,7 @@ truePosTop1000Count = 0
 
 
 for i in range(len(res)) : 
-    sourceImg = label['val'][i]
+    sourceImg = label['val'][index[i]]
     category = label['annotation'][sourceImg]
     top50 = [label['annotation'][res[i][j][1]] for j in range(min(1000, args.evaluateTopK))]
     truePosTop1000Count = truePosTop1000Count + 1 if category in top50[:min(1000, args.evaluateTopK)] else truePosTop1000Count
@@ -196,7 +203,7 @@ print (msg)
 
 
 
-nbSourceImg = len(preOrder)
+nbSourceImg = len(res)
 truePosCount = 0
 truePosTop2Count = 0
 truePosTop3Count = 0
@@ -212,9 +219,9 @@ truePosTop1000Count = 0
 
 
 for i in range(len(res)) : 
-    sourceImg = label['val'][i]
+    sourceImg = label['val'][index[i]]
     category = label['annotation'][sourceImg]
-    top50 = [label['annotation'][preOrder[i][j][1]] for j in range(1000)]
+    top50 = [label['annotation'][preOrder[index[i]][j][1]] for j in range(1000)]
     truePosTop1000Count = truePosTop1000Count + 1 if category in top50[:1000] else truePosTop1000Count
     truePosTop100Count = truePosTop100Count + 1 if category in top50[:100] else truePosTop100Count
     truePosTop50Count = truePosTop50Count + 1 if category in top50[:50] else truePosTop50Count
