@@ -93,11 +93,11 @@ if args.dataset == 'watermark':
         net = ResNetLayer4Feat( None )
         msg = 'loading weight from {}'.format(args.modelPth)
         print (msg)
+        modelParams = torch.load(args.modelPth)
         for key in list(modelParams.keys()) : 
             if 'fc.fc1' in key: 
                 modelParams.pop(key, None)
-        modelParams = torch.load(args.modelPth)
-
+        
     net.load_state_dict( modelParams )
 
 else : 
@@ -118,11 +118,11 @@ else :
         net = ResNetLayer4Feat( None )
         msg = 'loading weight from {}'.format(args.modelPth)
         print (msg)
+        modelParams = torch.load(args.modelPth)
         for key in list(modelParams.keys()) : 
             if 'fc' in key: 
                 modelParams.pop(key, None)
-        modelParams = torch.load(args.modelPth)
-
+        
     net.load_state_dict( modelParams )
 
 net.eval()
@@ -164,7 +164,7 @@ for sourceImgName in tqdm(label['val']) :
     res[sourceImgName] = []
     for targetImgName in tqdm(label['searchImg']) : 
         targetImgPath = os.path.join(args.searchDir, targetImgName)
-        maxScore, bestInlier, flip = 0, {}, False ## to find best image among flipped image
+        maxScore, bestInlier, flipBest = 0, {}, False ## to find best image among flipped image
         
         
         score, inlier = pair_discovery.PairDiscovery(sourceImgName, args.queryDir, targetImgName, args.searchDir, net, transform, args.tolerance, args.margin, args.featScaleBase, scaleList, args.eta, args.featLayer, args.scoreType, RefFeat, False)

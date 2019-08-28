@@ -2,7 +2,7 @@
 
 Pytorch implementation of Paper "Large-Scale Historical Watermark Recognition: dataset and a new consistency-based approach"
 
-[[PDF]](http://imagine.enpc.fr/~shenx/Watermark/watermarkReco.pdf) [[Project website]](http://imagine.enpc.fr/~shenx/Watermark) 
+[[Arxiv]](http://arxiv.org/pdf/1908.10254.pdf) [[Project website]](http://imagine.enpc.fr/~shenx/Watermark) 
 
 <p align="center">
 <img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/teaser.jpg" width="800px" alt="teaser">
@@ -46,7 +46,7 @@ cd data/
 bash download_data.sh
 ```
 
-Resume of the watermark dataset:
+Summary of the watermark dataset:
  
 | Dataset |   #cls X #img per cls | Description and Task| Our Top-1 Acc (%)|
 | :------: |  :------: | :------: |:------: |
@@ -119,7 +119,7 @@ Dataset: B Test + Briquet
 ``` Bash
 cd localMatching/
 bash demo_Briquet_Baseline.sh # AvgPool, Concat and Local Sim. baselines
-bash demo_Briquet_Baseline.sh # AvgPool, Concat and Local Sim. baselines
+demo_Briquet_Ours.sh # Our approach w / wo F.T.
 
 ```
 ## Feature Learning
@@ -138,7 +138,7 @@ bash demo_SBIR_Finetune.sh # Eta = 4 for chairs and shoes
 
 ## Visual Results 
 
-More visual results can be found in our [Project website](http://imagine.enpc.fr/~shenx/Watermark/). 
+More visual results can be found in our [project website](http://imagine.enpc.fr/~shenx/Watermark/). 
 
 Top-5 retrieval results on Briquet + B Test dataset with using engraving as references:
 
@@ -159,7 +159,9 @@ Top-5 retrieval results on Shoes / Chairs Test dataset:
 <img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/chairs.jpg" width="800px" alt="teaser">
 </p>
 
+## Acknowledgment
 
+This work was partly supported by ANR project EnHeritANR-17-CE23-0008 PSL [Filigrane pour tous](https://filigranes.hypotheses.org/english) project and gifts from Adobe to Ecole des Ponts. 
 
 
 
