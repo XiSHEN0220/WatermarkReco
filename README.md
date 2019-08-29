@@ -48,7 +48,7 @@ cd data/
 bash download_data.sh ## Watermark + Shoes / Chairs datasets
 ```
 
-Or click [here(~400)](http://imagine.enpc.fr/~shenx/data/Watermark.zip) to download it. 
+Or click [here(~400M)](http://imagine.enpc.fr/~shenx/data/Watermark.zip) to download it. 
 
 A full description of dataset is provided in our [project website](http://imagine.enpc.fr/~shenx/Watermark).
 
