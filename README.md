@@ -40,30 +40,18 @@ bash requirement.sh
 
 ### Datasets
 
-To download datasets: 
+We release our watermark dataset composed of 4 subsets targeting on 4 different tasks: classification, one-shot, one-shot cross-domain and large-scale one-shot cross-domain recognition. 
+
+You can run the following command to directly download the dataset:
 ``` Bash
 cd data/
-bash download_data.sh
+bash download_data.sh ## Watermark + Shoes / Chairs datasets
 ```
 
-Summary of the watermark dataset:
- 
-| Dataset |   #cls X #img per cls | Description and Task| Our Top-1 Acc (%)|
-| :------: |  :------: | :------: |:------: |
-| A Train | 100 X 50 + 100 X 10| Train and test on the same 100 classes, classification|-|
-| A Test | 100 X 3| Another 100 classes different from A train, 1 ref + 2 test photographs, one-shot recognition|90|
-| B Train | 140 X 1-7| 140 classes, 1 drawing + 1-7 photographs, cross-domain feature fine-tuning|-|
-| B Test | 100 X 3| 100 classes different from B Train, 1 drawing + 2 photographs, one-shot cross-domain recognition|83|
-| Briquet | 16,753 X 1| 16, 753 classes, 1 engraving, large scale one-shot cross-domain recognition|55|
+Or click [here(~400)](http://imagine.enpc.fr/~shenx/data/Watermark.zip) to download it. 
 
-Resume of the shoes / chairs dataset:
- 
-| Dataset |  #cls X #img per cls | Description and Task| Our Top-1 Acc (%)|
-| :------: |  :------: | :------: |:------: |
-| Shoes Train| 304 X 2| 1 photo + 1 sketch, cross-domain feature fine-tuning |-|
-| Shoes Test | 115 X 2| Another 115 classes different from Shoes train, 1 photo + 1 sketch, one-shot cross-domain recognition|52.2|
-| Chair Train | 200 X 2| 200 classes, 1 photo + 1 sketch, cross-domain feature fine-tuning|-|
-| Chair Test | 97 X 2| Another 97 classes different from Chair Train, 1 photo + 1 sketch, one-shot cross-domain recognition|91.8|
+A full description of dataset is provided in our [project website](http://imagine.enpc.fr/~shenx/Watermark).
+
 
 ###  Models
 
