@@ -2,7 +2,7 @@
 
 Pytorch implementation of Paper "Large-Scale Historical Watermark Recognition: dataset and a new consistency-based approach"
 
-[[arXiv]](http://arxiv.org/pdf/1908.10254.pdf) [[Project website]](http://imagine.enpc.fr/~shenx/Watermark) [[YouTube Video (5mins)]](https://youtu.be/9Y47oyvjfQ8) [[Slides]](http://imagine.enpc.fr/~shenx/Watermark/watermarkReco.pptx) 
+[[arXiv](http://arxiv.org/pdf/1908.10254.pdf)] [[Project website](http://imagine.enpc.fr/~shenx/Watermark)] [[YouTube Video (5mins)](https://youtu.be/9Y47oyvjfQ8)] [[Slides](http://imagine.enpc.fr/~shenx/Watermark/watermarkReco.pptx)] 
 
 <p align="center">
 <img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/teaser.jpg" width="800px" alt="teaser">
