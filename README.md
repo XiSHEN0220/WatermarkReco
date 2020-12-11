@@ -2,7 +2,7 @@
 
 Pytorch implementation of Paper "Large-Scale Historical Watermark Recognition: dataset and a new consistency-based approach"
 
-[[Arxiv]](http://arxiv.org/pdf/1908.10254.pdf) [[Project website]](http://imagine.enpc.fr/~shenx/Watermark) 
+[[arXiv]](http://arxiv.org/pdf/1908.10254.pdf) [[Project website]](http://imagine.enpc.fr/~shenx/Watermark) [[YouTube Video (5mins)]](https://youtu.be/9Y47oyvjfQ8) [[Slides]](http://imagine.enpc.fr/~shenx/Watermark/watermarkReco.pptx) 
 
 <p align="center">
 <img src="https://github.com/XiSHEN0220/WatermarkReco/blob/master/figure/teaser.jpg" width="800px" alt="teaser">
@@ -11,11 +11,11 @@ Pytorch implementation of Paper "Large-Scale Historical Watermark Recognition: d
 The project is an extension work to [ArtMiner](http://imagine.enpc.fr/~shenx/ArtMiner/). If our project is helpful for your research, please consider citing : 
 
 ```
-@inproceedings{shen2019watermark,
+@inproceedings{shen2020watermark,
           title={Large-Scale Historical Watermark Recognition: dataset and a new consistency-based approach},
           author={Shen, Xi and Pastrolin, Ilaria and Bounou, Oumayma and Gidaris, Spyros and Smith, Marc and Poncet, Olivier and Aubry, Mathieu},
-          booktitle={Arxiv},
-          year={2019}
+          booktitle={ICPR},
+          year={2020}
         }
 ```
 
